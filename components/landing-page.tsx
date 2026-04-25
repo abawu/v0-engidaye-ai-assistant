@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import {
@@ -232,100 +232,158 @@ function SampleChatDemo({
   onOpenChange: (open: boolean) => void
   onStartFullChat: () => void
 }) {
-  const [selectedQuestion, setSelectedQuestion] = useState(sampleQuestions[0])
-  const answer = sampleAnswers[selectedQuestion]
+  const [messages, setMessages] = useState<
+    Array<{ role: 'assistant' | 'user'; content: string }>
+  >([
+    {
+      role: 'assistant',
+      content:
+        'Welcome to Engidaye. Choose a sample question below and I will answer like the real Ethiopia travel assistant.',
+    },
+  ])
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const handleQuestion = (question: string) => {
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      { role: 'user', content: question },
+      {
+        role: 'assistant',
+        content: sampleAnswers[question],
+      },
+    ])
+  }
+
+  const resetDemo = () => {
+    setMessages([
+      {
+        role: 'assistant',
+        content:
+          'Welcome to Engidaye. Choose a sample question below and I will answer like the real Ethiopia travel assistant.',
+      },
+    ])
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] max-w-4xl overflow-hidden border-amber-300/50 bg-slate-950 p-0 text-white shadow-2xl">
-        <div className="grid min-h-[620px] grid-cols-1 md:grid-cols-[290px_1fr]">
-          <aside className="border-b border-amber-500/20 bg-slate-900 p-5 md:border-b-0 md:border-r">
-            <DialogHeader>
-              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-amber-400 text-slate-950">
-                <MessageCircle className="h-5 w-5" />
-              </div>
-              <DialogTitle className="text-2xl text-amber-300">
-                Sample travel chat
-              </DialogTitle>
-              <DialogDescription className="text-slate-300">
-                Preview Engidaye with ready-made answers while the live AI API is
-                being connected.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="mt-6 space-y-2">
-              {sampleQuestions.map((question) => (
-                <button
-                  key={question}
-                  onClick={() => setSelectedQuestion(question)}
-                  className={`w-full rounded-lg border p-3 text-left text-sm transition-colors ${
-                    selectedQuestion === question
-                      ? 'border-amber-400 bg-amber-400 text-slate-950'
-                      : 'border-white/10 bg-white/5 text-slate-200 hover:border-amber-300/70 hover:bg-white/10'
-                  }`}
-                >
-                  {question}
-                </button>
-              ))}
-            </div>
-
-            <Button
-              onClick={() => {
-                onOpenChange(false)
-                onStartFullChat()
-              }}
-              variant="outline"
-              className="mt-6 w-full border-amber-400/70 bg-transparent text-amber-300 hover:bg-amber-400 hover:text-slate-950"
-            >
-              Open full chat
-            </Button>
-          </aside>
-
-          <section className="flex min-h-0 flex-col bg-slate-50 text-slate-950">
-            <div className="border-b border-slate-200 px-5 py-4">
-              <p className="text-sm font-semibold text-slate-500">
-                Tourist question
-              </p>
-              <div className="mt-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-sm font-medium text-white">
-                {selectedQuestion}
-              </div>
-            </div>
-
-            <ScrollArea className="min-h-0 flex-1">
-              <div className="space-y-4 px-5 py-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-900 text-amber-300">
-                    <Sparkles className="h-4 w-4" />
-                  </div>
-                  <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm leading-6 shadow-sm">
-                    <p className="mb-3 font-semibold text-slate-900">
-                      Engidaye sample answer
-                    </p>
-                    <div className="whitespace-pre-wrap text-slate-700">
-                      {answer}
-                    </div>
-                  </div>
+      <DialogContent className="flex h-[92vh] max-h-[760px] max-w-4xl flex-col overflow-hidden border-amber-300/50 bg-slate-50 p-0 text-slate-950 shadow-2xl sm:h-[88vh]">
+        <header className="border-b border-slate-200 bg-slate-950 px-5 py-4 text-white">
+          <DialogHeader className="gap-0">
+            <div className="flex items-center justify-between gap-4 pr-8">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-amber-400 text-slate-950">
+                  <MessageCircle className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <DialogTitle className="truncate text-xl text-amber-300">
+                    Engidaye sample chat
+                  </DialogTitle>
+                  <DialogDescription className="text-sm text-slate-300">
+                    Guided demo mode until the live API is connected.
+                  </DialogDescription>
                 </div>
               </div>
-            </ScrollArea>
-
-            <div className="border-t border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
-                <span className="flex-1 truncate">
-                  Ask about Lalibela, Addis Ababa, food, culture, or trip plans
-                </span>
+              <div className="hidden items-center gap-2 sm:flex">
                 <Button
+                  onClick={resetDemo}
+                  variant="outline"
                   size="sm"
-                  onClick={() => setSelectedQuestion(sampleQuestions[1])}
-                  className="bg-slate-900 text-amber-300 hover:bg-slate-800"
+                  className="border-white/20 bg-transparent text-slate-200 hover:bg-white/10 hover:text-white"
                 >
-                  <Send className="mr-2 h-4 w-4" />
-                  Try
+                  New demo
+                </Button>
+                <Button
+                  onClick={() => {
+                    onOpenChange(false)
+                    onStartFullChat()
+                  }}
+                  size="sm"
+                  className="bg-amber-400 text-slate-950 hover:bg-amber-300"
+                >
+                  Open full chat
                 </Button>
               </div>
             </div>
-          </section>
-        </div>
+          </DialogHeader>
+        </header>
+
+        <ScrollArea className="min-h-0 flex-1 bg-slate-100">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6">
+            {messages.map((message, index) => (
+              <div
+                key={`${message.role}-${index}`}
+                className={`flex gap-3 ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                {message.role === 'assistant' && (
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-950 text-amber-300 shadow-sm">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${
+                    message.role === 'user'
+                      ? 'rounded-br-sm bg-gradient-to-r from-amber-500 to-orange-500 font-medium text-white'
+                      : 'rounded-bl-sm border border-slate-200 bg-white text-slate-800'
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap">{message.content}</div>
+                </div>
+                {message.role === 'user' && (
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100 text-slate-900 shadow-sm">
+                    <span className="text-sm font-bold">You</span>
+                  </div>
+                )}
+              </div>
+            ))}
+            <div ref={scrollRef} />
+          </div>
+        </ScrollArea>
+
+        <footer className="border-t border-slate-200 bg-white px-4 py-4 sm:px-5">
+          <div className="mx-auto max-w-3xl">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Choose a sample question
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {sampleQuestions.map((question) => (
+                <button
+                  key={question}
+                  onClick={() => handleQuestion(question)}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition-colors hover:border-amber-300 hover:bg-amber-50"
+                >
+                  <span>{question}</span>
+                  <Send className="h-4 w-4 flex-shrink-0 text-amber-600" />
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex gap-2 sm:hidden">
+              <Button
+                onClick={resetDemo}
+                variant="outline"
+                size="sm"
+                className="flex-1"
+              >
+                New demo
+              </Button>
+              <Button
+                onClick={() => {
+                  onOpenChange(false)
+                  onStartFullChat()
+                }}
+                size="sm"
+                className="flex-1 bg-slate-950 text-amber-300 hover:bg-slate-800"
+              >
+                Open full chat
+              </Button>
+            </div>
+          </div>
+        </footer>
       </DialogContent>
     </Dialog>
   )
