@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Home } from 'lucide-react'
+import { Home, Sparkles } from 'lucide-react'
+import { sampleQuestions, getSampleResponse } from '@/lib/sample-data'
 
 export function ChatInterface({ onBack }: { onBack?: () => void }) {
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [useSampleData, setUseSampleData] = useState(false)
 
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
@@ -29,8 +31,29 @@ export function ChatInterface({ onBack }: { onBack?: () => void }) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
+
+    // Check if we have a sample response
+    const sampleResponse = getSampleResponse(input)
+    if (sampleResponse && useSampleData) {
+      // Manually add messages when using sample data
+      console.log('[v0] Using sample data for question:', input)
+    }
+
     sendMessage({ text: input })
     setInput('')
+  }
+
+  const handleSampleQuestion = (question: string) => {
+    setInput(question)
+    setTimeout(() => {
+      // Trigger the form submission
+      const sampleResponse = getSampleResponse(question)
+      if (sampleResponse && useSampleData) {
+        console.log('[v0] Using sample data for question:', question)
+      }
+      sendMessage({ text: question })
+      setInput('')
+    }, 0)
   }
 
   return (
@@ -63,17 +86,34 @@ export function ChatInterface({ onBack }: { onBack?: () => void }) {
       <ScrollArea className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto w-full px-4 py-6 sm:px-6 space-y-4">
           {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-64 flex-col gap-4">
+            <div className="flex items-center justify-center h-full flex-col gap-6 py-12">
               <div className="text-6xl">🌍</div>
               <div className="text-center">
-                <h2 className="text-xl font-semibold text-amber-900 mb-2">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">
                   Welcome to Ethiopia
                 </h2>
-                <p className="text-amber-700 max-w-sm">
+                <p className="text-slate-600 max-w-sm mb-8">
                   Ask me about trip planning, Ethiopian food, hotels, cultural
                   experiences, or Amharic translations. Let&apos;s explore
                   together!
                 </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
+                {sampleQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSampleQuestion(question)}
+                    disabled={isLoading}
+                    className="group p-3 text-left rounded-lg border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0 group-hover:text-orange-600" />
+                      <span className="text-sm font-medium text-slate-800 group-hover:text-amber-900">
+                        {question}
+                      </span>
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           ) : (

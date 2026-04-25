@@ -4,6 +4,7 @@ import {
   UIMessage,
   consumeStream,
 } from 'ai'
+import { getSampleResponse } from '@/lib/sample-data'
 
 export const maxDuration = 30
 
@@ -60,6 +61,38 @@ When users ask questions outside your expertise, politely redirect them back to 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
+  // Get the last user message
+  const lastUserMessage = messages
+    .filter((m) => m.role === 'user')
+    .pop()
+  const lastUserText = lastUserMessage?.parts
+    ?.filter((p) => p.type === 'text')
+    .map((p) => (p as any).text)
+    .join('')
+
+  // Check if we have a sample response for this question
+  const sampleResponse = lastUserText ? getSampleResponse(lastUserText) : null
+
+  if (sampleResponse) {
+    console.log('[v0] Using sample response for:', lastUserText)
+    // Return sample response as a stream
+    return streamText({
+      model: 'openai/gpt-4',
+      system: ENGIDAYE_SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user',
+          content: lastUserText || '',
+        },
+      ],
+      prompt: sampleResponse,
+    }).toUIMessageStreamResponse({
+      originalMessages: messages,
+      consumeSseStream: consumeStream,
+    })
+  }
+
+  // Otherwise use the real API
   const result = streamText({
     model: 'openai/gpt-4',
     system: ENGIDAYE_SYSTEM_PROMPT,
