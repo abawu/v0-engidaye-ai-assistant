@@ -3,9 +3,29 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, MapPin, Utensils, Hotel, Globe, Sparkles } from 'lucide-react'
+import {
+  ArrowRight,
+  Globe,
+  Hotel,
+  MapPin,
+  MessageCircle,
+  Send,
+  Sparkles,
+  Utensils,
+} from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { sampleAnswers, sampleQuestions } from '@/lib/sample-data'
 
 export function LandingPage({ onStart }: { onStart: () => void }) {
+  const [demoOpen, setDemoOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Navigation */}
@@ -19,7 +39,7 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
             </div>
           </div>
           <Button
-            onClick={onStart}
+            onClick={() => setDemoOpen(true)}
             className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold"
           >
             Start Exploring
@@ -72,7 +92,7 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
 
             {/* CTA Button */}
             <Button
-              onClick={onStart}
+              onClick={() => setDemoOpen(true)}
               size="lg"
               className="bg-gradient-to-r from-amber-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-white font-bold mt-8 gap-2"
             >
@@ -178,7 +198,7 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
             Start chatting with Engidaye now and plan your unforgettable journey
           </p>
           <Button
-            onClick={onStart}
+            onClick={() => setDemoOpen(true)}
             size="lg"
             className="bg-gradient-to-r from-amber-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-white font-bold gap-2"
           >
@@ -193,7 +213,121 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
           <p>Engidaye - Your AI Guide to Ethiopia &copy; 2024</p>
         </div>
       </footer>
+
+      <SampleChatDemo
+        open={demoOpen}
+        onOpenChange={setDemoOpen}
+        onStartFullChat={onStart}
+      />
     </div>
+  )
+}
+
+function SampleChatDemo({
+  open,
+  onOpenChange,
+  onStartFullChat,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onStartFullChat: () => void
+}) {
+  const [selectedQuestion, setSelectedQuestion] = useState(sampleQuestions[0])
+  const answer = sampleAnswers[selectedQuestion]
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[92vh] max-w-4xl overflow-hidden border-amber-300/50 bg-slate-950 p-0 text-white shadow-2xl">
+        <div className="grid min-h-[620px] grid-cols-1 md:grid-cols-[290px_1fr]">
+          <aside className="border-b border-amber-500/20 bg-slate-900 p-5 md:border-b-0 md:border-r">
+            <DialogHeader>
+              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-amber-400 text-slate-950">
+                <MessageCircle className="h-5 w-5" />
+              </div>
+              <DialogTitle className="text-2xl text-amber-300">
+                Sample travel chat
+              </DialogTitle>
+              <DialogDescription className="text-slate-300">
+                Preview Engidaye with ready-made answers while the live AI API is
+                being connected.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-6 space-y-2">
+              {sampleQuestions.map((question) => (
+                <button
+                  key={question}
+                  onClick={() => setSelectedQuestion(question)}
+                  className={`w-full rounded-lg border p-3 text-left text-sm transition-colors ${
+                    selectedQuestion === question
+                      ? 'border-amber-400 bg-amber-400 text-slate-950'
+                      : 'border-white/10 bg-white/5 text-slate-200 hover:border-amber-300/70 hover:bg-white/10'
+                  }`}
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+
+            <Button
+              onClick={() => {
+                onOpenChange(false)
+                onStartFullChat()
+              }}
+              variant="outline"
+              className="mt-6 w-full border-amber-400/70 bg-transparent text-amber-300 hover:bg-amber-400 hover:text-slate-950"
+            >
+              Open full chat
+            </Button>
+          </aside>
+
+          <section className="flex min-h-0 flex-col bg-slate-50 text-slate-950">
+            <div className="border-b border-slate-200 px-5 py-4">
+              <p className="text-sm font-semibold text-slate-500">
+                Tourist question
+              </p>
+              <div className="mt-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-sm font-medium text-white">
+                {selectedQuestion}
+              </div>
+            </div>
+
+            <ScrollArea className="min-h-0 flex-1">
+              <div className="space-y-4 px-5 py-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-900 text-amber-300">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm leading-6 shadow-sm">
+                    <p className="mb-3 font-semibold text-slate-900">
+                      Engidaye sample answer
+                    </p>
+                    <div className="whitespace-pre-wrap text-slate-700">
+                      {answer}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+
+            <div className="border-t border-slate-200 bg-white p-4">
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                <span className="flex-1 truncate">
+                  Ask about Lalibela, Addis Ababa, food, culture, or trip plans
+                </span>
+                <Button
+                  size="sm"
+                  onClick={() => setSelectedQuestion(sampleQuestions[1])}
+                  className="bg-slate-900 text-amber-300 hover:bg-slate-800"
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Try
+                </Button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
