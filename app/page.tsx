@@ -1,11 +1,15 @@
-import { ChatInterface } from '@/components/chat-interface'
+'use client'
 
-export const metadata = {
-  title: 'Engidaye - Your AI Guide to Ethiopia',
-  description:
-    'Discover Ethiopia with Engidaye: AI-powered trip planning, Ethiopian food guides, hotel recommendations, language translation, and cultural experiences.',
-}
+import { useState } from 'react'
+import { ChatInterface } from '@/components/chat-interface'
+import { LandingPage } from '@/components/landing-page'
 
 export default function Home() {
-  return <ChatInterface />
+  const [showChat, setShowChat] = useState(false)
+
+  if (!showChat) {
+    return <LandingPage onStart={() => setShowChat(true)} />
+  }
+
+  return <ChatInterface onBack={() => setShowChat(false)} />
 }

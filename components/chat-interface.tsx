@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Home } from 'lucide-react'
 
-export function ChatInterface() {
+export function ChatInterface({ onBack }: { onBack?: () => void }) {
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -33,17 +34,28 @@ export function ChatInterface() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50">
       {/* Header */}
-      <header className="border-b border-amber-200 bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6">
+      <header className="border-b border-amber-200 bg-gradient-to-r from-slate-900 to-slate-800 shadow-lg sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="text-3xl">🇪🇹</div>
             <div>
-              <h1 className="text-2xl font-bold text-amber-900">Engidaye</h1>
-              <p className="text-sm text-amber-700">Your AI Guide to Ethiopia</p>
+              <h1 className="text-2xl font-bold text-amber-400">Engidaye</h1>
+              <p className="text-sm text-amber-600">Your AI Guide to Ethiopia</p>
             </div>
           </div>
+          {onBack && (
+            <Button
+              onClick={onBack}
+              variant="outline"
+              size="sm"
+              className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Home
+            </Button>
+          )}
         </div>
       </header>
 
@@ -78,8 +90,8 @@ export function ChatInterface() {
                 <div
                   className={`max-w-xl lg:max-w-2xl px-4 py-3 rounded-lg ${
                     message.role === 'user'
-                      ? 'bg-amber-600 text-white rounded-br-none'
-                      : 'bg-white border border-amber-200 text-amber-900 rounded-bl-none shadow-sm'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-br-none shadow-md'
+                      : 'bg-white border border-slate-200 text-slate-900 rounded-bl-none shadow-md'
                   }`}
                 >
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
@@ -116,7 +128,7 @@ export function ChatInterface() {
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="border-t border-amber-200 bg-white shadow-lg">
+      <div className="border-t border-slate-200 bg-white shadow-lg">
         <div className="max-w-4xl mx-auto w-full px-4 py-4 sm:px-6">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
@@ -124,17 +136,17 @@ export function ChatInterface() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about trips, food, culture, or language..."
               disabled={isLoading}
-              className="flex-1 border-amber-200 focus:border-amber-600 focus:ring-amber-600"
+              className="flex-1 border-slate-300 focus:border-amber-600 focus:ring-amber-600"
             />
             <Button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-amber-600 hover:bg-amber-700 text-white"
+              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold"
             >
               {isLoading ? '...' : 'Send'}
             </Button>
           </form>
-          <p className="text-xs text-amber-600 mt-2">
+          <p className="text-xs text-slate-600 mt-2">
             Engidaye can help with trip planning, food guides, hotel
             recommendations, language translation, and cultural insights.
           </p>
